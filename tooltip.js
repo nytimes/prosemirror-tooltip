@@ -1,5 +1,3 @@
-const {elt, insertCSS} = require("../util/dom")
-
 const prefix = "ProseMirror-tooltip"
 
 // ;; Used to show tooltips. An instance of this class is a persistent
@@ -141,6 +139,24 @@ function windowRect() {
     left: 0, right: window.innerWidth,
     top: 0, bottom: window.innerHeight
   }
+}
+
+function insertCSS(css) {
+  cssNode = document.createElement("style")
+  cssNode.textContent = "/* Tooltip CSS */\n" + css
+  document.head.insertBefore(cssNode, document.head.firstChild)
+}
+
+function elt(tag, attrs, ...args) {
+  let result = document.createElement(tag)
+  if (attrs) for (let name in attrs) {
+    if (name == "style")
+      result.style.cssText = attrs[name]
+    else if (attrs[name] != null)
+      result.setAttribute(name, attrs[name])
+  }
+  for (let i = 0; i < args.length; i++) add(args[i], result)
+  return result
 }
 
 insertCSS(`
