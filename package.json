@@ -2,7 +2,7 @@
   "name": "prosemirror-tooltip",
   "version": "1.0.0",
   "description": "",
-  "main": "tooltip.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/newsdev/prosemirror-tooltip/issues"
   },
-  "homepage": "https://github.com/newsdev/prosemirror-tooltip#readme"
+  "homepage": "https://github.com/newsdev/prosemirror-tooltip#readme",
+  "dependencies": {
+    "babel-preset-es2015": "^6.16.0"
+  }
 }
