@@ -1,3 +1,4 @@
+/* eslint-disable */
 const prefix = "ProseMirror-tooltip"
 
 // ;; Used to show tooltips. An instance of this class is a persistent
@@ -276,3 +277,4 @@ insertCSS(`
 }
 
 `)
+/* eslint-enable */
