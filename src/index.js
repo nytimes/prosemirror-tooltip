@@ -141,7 +141,7 @@ function windowRect() {
 }
 
 function insertCSS(css) {
-  cssNode = document.createElement("style")
+  const cssNode = document.createElement("style")
   cssNode.textContent = "/* Tooltip CSS */\n" + css
   document.head.insertBefore(cssNode, document.head.firstChild)
 }
@@ -156,6 +156,17 @@ function elt(tag, attrs, ...args) {
   }
   for (let i = 0; i < args.length; i++) add(args[i], result)
   return result
+}
+
+function add(value, target) {
+  if (typeof value == "string")
+    value = document.createTextNode(value)
+
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) add(value[i], target)
+  } else {
+    target.appendChild(value)
+  }
 }
 
 insertCSS(`
