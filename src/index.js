@@ -85,43 +85,131 @@ export default class Tooltip {
     this.dom.style.width = size.width + "px"
     this.dom.style.height = size.height + "px"
 
-    const margin = 5
-    if (this.dir == "above" || this.dir == "below") {
-      let tipLeft = Math.max(boundingRect.left, Math.min(left - size.width / 2, boundingRect.right - size.width))
-      this.dom.style.left = (tipLeft - around.left) + "px"
-      this.pointer.style.left = (left - around.left - this.pointerWidth / 2) + "px"
-      if (this.dir == "above") {
-        let tipTop = top - around.top - margin - this.pointerHeight - size.height
-        this.dom.style.top = tipTop + "px"
-        this.pointer.style.top = (tipTop + size.height) + "px"
-      } else { // below
-        let tipTop = top - around.top + margin
-        this.pointer.style.top = tipTop + "px"
-        this.dom.style.top = (tipTop + this.pointerHeight) + "px"
+    // const margin = 5
+    // get the bounds for each placement
+    // loop through them and find one that's on-screen. if none fit on screen,
+    // use the center one?
+    const directions = ['above', 'below', 'left', 'right']
+    directions.unshift(this.dir)
+    directions.splice(directions.indexOf(this.dir, 1), 1)
+    const placements = []
+    directions.forEach((direction) => {
+      placements.push(this.getPlacementLayoutInfo({
+        placement: direction,
+        size: size,
+        pos: { left: left, top: top }
+      }))
+    })
+
+    // Find a placement that fits within the viewport.
+    let i = 0
+    for (; i < placements.length; i++) {
+      let placement = placements[i]
+      let viewportBounds = {}
+      viewportBounds.left = (window.pageXOffset || document.scrollLeft || 0) - (document.clientLeft || 0)
+      viewportBounds.top = (window.pageYOffset || document.scrollTop || 0)  - (document.clientTop || 0)
+      viewportBounds.right = viewportBounds.left + window.innerWidth
+      viewportBounds.bottom = viewportBounds.top + window.innerHeight
+      if (placement.bounds.left + around.left >= viewportBounds.left && placement.bounds.right + around.left <= viewportBounds.right && placement.bounds.top + around.top >= viewportBounds.top && placement.bounds.bottom + around.top <= viewportBounds.bottom) {
+        this.dom.style.left = placement.dom.left + "px"
+        this.dom.style.top = placement.dom.top + "px"
+        this.pointer.style.left = placement.pointer.left + "px"
+        this.pointer.style.top = placement.pointer.top + "px"
+        break
       }
-    } else if (this.dir == "left" || this.dir == "right") {
-      this.dom.style.top = (top - around.top - size.height / 2) + "px"
-      this.pointer.style.top = (top - this.pointerHeight / 2 - around.top) + "px"
-      if (this.dir == "left") {
-        let pointerLeft = left - around.left - margin - this.pointerWidth
-        this.dom.style.left = (pointerLeft - size.width) + "px"
-        this.pointer.style.left = pointerLeft + "px"
-      } else { // right
-        let pointerLeft = left - around.left + margin
-        this.dom.style.left = (pointerLeft + this.pointerWidth) + "px"
-        this.pointer.style.left = pointerLeft + "px"
-      }
-    } else if (this.dir == "center") {
-      let top = Math.max(around.top, boundingRect.top), bottom = Math.min(around.bottom, boundingRect.bottom)
-      let fromTop = (bottom - top - size.height) / 2
-      this.dom.style.left = (around.width - size.width) / 2 + "px"
-      this.dom.style.top = (top - around.top + fromTop) + "px"
+    }
+    // If no placement fits in viewport, try the first one.
+    if (i === placements.length) {
+      let placement = placements[0]
+      this.dom.style.left = placement.dom.left + "px"
+      this.dom.style.top = placement.dom.top + "px"
+      this.pointer.style.left = placement.pointer.left + "px"
+      this.pointer.style.top = placement.pointer.top + "px"
     }
 
     getComputedStyle(this.dom).opacity
     getComputedStyle(this.pointer).opacity
     this.dom.style.opacity = this.pointer.style.opacity = 1
     this.isOpen = true
+  }
+
+  getPlacementLayoutInfo({placement, size, pos}) {
+    let left = this.lastLeft = pos ? pos.left : this.lastLeft
+    let top = this.lastTop = pos ? pos.top : this.lastTop
+
+    const margin = 5
+
+    // Use the window as the bounding rectangle if no getBoundingRect
+    // function is defined
+    let boundingRect = (this.options.getBoundingRect || windowRect)()
+
+    let around = this.wrapper.getBoundingClientRect()
+    // get the bounds for each placement
+    // loop through them and find one that's on-screen. if none fit on screen,
+    // use the center one?
+    //
+    let placementInfo = {
+      dom: {}, pointer: {}, bounds: {}
+    }
+    if (placement == "above" || placement == "below") {
+      // Calculate the tipLeft, ensuring it is within the bounding rectangle.
+      let tipLeft = Math.max(boundingRect.left, Math.min(left - size.width / 2, boundingRect.right - size.width))
+      placementInfo.dom.left = tipLeft - around.left
+      placementInfo.pointer.left = left - around.left - this.pointerWidth / 2
+      if (placement == "above") {
+        let tipTop = top - around.top - margin - this.pointerHeight - size.height
+        placementInfo.dom.top = tipTop
+        placementInfo.pointer.top = tipTop + size.height
+        placementInfo.bounds = {
+          left: tipLeft,
+          right: tipLeft + size.width,
+          top: tipTop,
+          bottom: tipTop + size.height + this.pointerHeight + margin
+        }
+      } else { // below
+        let tipTop = top - around.top + margin
+        placementInfo.dom.top = tipTop + this.pointerHeight
+        placementInfo.pointer.top = tipTop
+        placementInfo.bounds = {
+          left: tipLeft,
+          right: tipLeft + size.width,
+          top: tipTop,
+          bottom: tipTop + size.height + this.pointerHeight + margin
+        }
+      }
+    } else if (placement == "left" || placement == "right") {
+      placementInfo.dom.top = top - around.top - size.height / 2
+      placementInfo.pointer.top = top - this.pointerHeight / 2 - around.top
+      if (placement == "left") {
+        let pointerLeft = left - around.left - margin - this.pointerWidth
+        placementInfo.dom.left = pointerLeft - size.width
+        placementInfo.pointer.left = pointerLeft + "px"
+        placementInfo.bounds = {
+          left: pointerLeft - size.width,
+          right: pointerLeft + this.pointerWidth + margin,
+          top: top - around.top - size.height / 2,
+          bottom: top - around.top + size.height / 2
+        }
+      } else { // right
+        let pointerLeft = left - around.left + margin
+        placementInfo.dom.left = pointerLeft + this.pointerWidth
+        placementInfo.pointer.left = pointerLeft
+        placementInfo.bounds = {
+          left: pointerLeft,
+          right: pointerLeft + this.pointerWidth + size.width,
+          top: top - around.top - size.height / 2,
+          bottom: top - around.top + size.height / 2
+        }
+      }
+    } else if (placement == "center") {
+      let top = Math.max(around.top, boundingRect.top), bottom = Math.min(around.bottom, boundingRect.bottom)
+      let fromTop = (bottom - top - size.height) / 2
+      this.dom.style.left = (around.width - size.width) / 2 + "px"
+      this.dom.style.top = (top - around.top + fromTop) + "px"
+    }
+
+    return placementInfo
+
   }
 
   // :: ()
