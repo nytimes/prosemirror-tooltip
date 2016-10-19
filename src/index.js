@@ -149,8 +149,10 @@ export default class Tooltip {
       viewportBounds.right = viewportBounds.left + window.innerWidth
       viewportBounds.bottom = viewportBounds.top + window.innerHeight
       if (placement.bounds.left + around.left >= viewportBounds.left && placement.bounds.right + around.left <= viewportBounds.right && placement.bounds.top + around.top >= viewportBounds.top && placement.bounds.bottom + around.top <= viewportBounds.bottom) {
-        // debugger
-        this.pointer.classList.remove([`${prefix}-pointer-top`, `${prefix}-pointer-bottom`, `${prefix}-pointer-left`, `${prefix}-pointer-right`])
+        this.pointer.classList.remove(`${prefix}-pointer-top`)
+        this.pointer.classList.remove(`${prefix}-pointer-left`)
+        this.pointer.classList.remove(`${prefix}-pointer-right`)
+        this.pointer.classList.remove(`${prefix}-pointer-bottom`)
         this.pointer.classList.add(`${prefix}-pointer-${placement.direction}`)
         this.dom.style.left = placement.dom.left + "px"
         this.dom.style.top = placement.dom.top + "px"
