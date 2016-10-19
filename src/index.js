@@ -79,7 +79,7 @@ export default class Tooltip {
   // tooltip stays in its previous place. Unless the tooltip's
   // direction is `"center"`, `pos` should definitely be given the
   // first time it is shown.
-  open({tooltipContent, coords, element}) {
+  open({tooltipContent, coords, element, className}) {
     let tooltipPossibleAnchorPoints
     if (coords) {
       tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides({
@@ -154,6 +154,14 @@ export default class Tooltip {
         this.pointer.classList.remove(`${prefix}-pointer-right`)
         this.pointer.classList.remove(`${prefix}-pointer-bottom`)
         this.pointer.classList.add(`${prefix}-pointer-${placement.direction}`)
+        if (placement.direction === 'top') {
+          this.pointerHeight = 12
+          this.pointerWidth = 6
+        }
+        if (placement.direction === 'bottom') {
+          this.pointerHeight = 22
+          this.pointerWidth = 13
+        }
         this.dom.style.left = placement.dom.left + "px"
         this.dom.style.top = placement.dom.top + "px"
         this.pointer.style.left = placement.pointer.left + "px"
@@ -164,6 +172,19 @@ export default class Tooltip {
     // If no placement fits in viewport, try the first one.
     if (i === placements.length) {
       let placement = placements[0]
+      this.pointer.classList.remove(`${prefix}-pointer-top`)
+      this.pointer.classList.remove(`${prefix}-pointer-left`)
+      this.pointer.classList.remove(`${prefix}-pointer-right`)
+      this.pointer.classList.remove(`${prefix}-pointer-bottom`)
+      this.pointer.classList.add(`${prefix}-pointer-${placement.direction}`)
+      if (placement.direction === 'top') {
+        this.pointerWidth = 12
+        this.pointerHeight = 6
+      }
+      if (placement.direction === 'bottom') {
+        this.pointerWidth = 22
+        this.pointerHeight = 13
+      }
       this.dom.style.left = placement.dom.left + "px"
       this.dom.style.top = placement.dom.top + "px"
       this.pointer.style.left = placement.pointer.left + "px"
@@ -173,6 +194,11 @@ export default class Tooltip {
     getComputedStyle(this.dom).opacity
     getComputedStyle(this.pointer).opacity
     this.dom.style.opacity = this.pointer.style.opacity = 1
+    this.className = className;
+    if(this.className){
+      this.pointer.classList.add(this.className);
+      this.dom.classList.add(this.className);
+    }
     this.isOpen = true
   }
 
@@ -257,6 +283,10 @@ export default class Tooltip {
     if (this.isOpen) {
       this.isOpen = false
       this.dom.style.opacity = this.pointer.style.opacity = 0
+      if(this.className){
+        this.dom.classList.remove(this.className);
+        this.pointer.classList.remove(this.className);
+      }
     }
   }
 }
