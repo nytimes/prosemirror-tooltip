@@ -80,17 +80,8 @@ export default class Tooltip {
   // direction is `"center"`, `pos` should definitely be given the
   // first time it is shown.
   open({tooltipContent, coords, element}) {
-    let left
-    let top
     let tooltipPossibleAnchorPoints
     if (coords) {
-      left = this.lastLeft = coords.left
-      top = this.lastTop = coords.top
-    } else if (element) {
-      tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(element.getBoundingClientRect())
-    } else {
-      left = this.lastLeft
-      top = this.lastTop
       tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides({
         top: coords.top,
         left: coords.left,
@@ -98,7 +89,9 @@ export default class Tooltip {
         bottom: coords.top,
         width: 0,
         height: 0,
-      });
+      })
+    } else if (element) {
+      tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(element.getBoundingClientRect())
     }
     // let left = this.lastLeft = coords ? coords.left : this.lastLeft
     // let top = this.lastTop = coords ? coords.top : this.lastTop
@@ -156,6 +149,9 @@ export default class Tooltip {
       viewportBounds.right = viewportBounds.left + window.innerWidth
       viewportBounds.bottom = viewportBounds.top + window.innerHeight
       if (placement.bounds.left + around.left >= viewportBounds.left && placement.bounds.right + around.left <= viewportBounds.right && placement.bounds.top + around.top >= viewportBounds.top && placement.bounds.bottom + around.top <= viewportBounds.bottom) {
+        // debugger
+        this.pointer.classList.remove([`${prefix}-pointer-top`, `${prefix}-pointer-bottom`, `${prefix}-pointer-left`, `${prefix}-pointer-right`])
+        this.pointer.classList.add(`${prefix}-pointer-${placement.direction}`)
         this.dom.style.left = placement.dom.left + "px"
         this.dom.style.top = placement.dom.top + "px"
         this.pointer.style.left = placement.pointer.left + "px"
@@ -191,7 +187,7 @@ export default class Tooltip {
     // use the center one?
     //
     let placementInfo = {
-      dom: {}, pointer: {}, bounds: {}
+      direction: placement, dom: {}, pointer: {}, bounds: {}
     }
     if (placement == "top" || placement == "bottom") {
       // Calculate the tipLeft, ensuring it is within the bounding rectangle.
