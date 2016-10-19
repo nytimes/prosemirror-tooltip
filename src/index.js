@@ -1,6 +1,27 @@
 /* eslint-disable */
 const prefix = "ProseMirror-tooltip"
 
+let getCenterPointsOfBoxSides = (box) => {
+  return {
+    top: {
+      top: box.top,
+      left: box.right - box.width / 2,
+    },
+    right: {
+      top: box.bottom - box.height / 2,
+      left: box.right,
+    },
+    bottom: {
+      top: box.bottom,
+      left: box.right - box.width / 2,
+    },
+    left: {
+      top: box.bottom - box.height / 2,
+      left: box.left,
+    }
+  }
+}
+
 // ;; Used to show tooltips. An instance of this class is a persistent
 // DOM node (to allow position and opacity animation) that can be
 // shown and hidden. It is positioned relative to a position (passed
@@ -15,13 +36,14 @@ export default class Tooltip {
   // containg a `direction` string and a `getBoundingRect` function which
   // should return a rectangle determining the space in which the tooltip
   // may appear. Alternatively, `options` may be a string specifying the
-  // direction. The direction can be `"above"`, `"below"`, `"right"`,
+  // direction. The direction can be `"top"`, `"bottom"`, `"right"`,
   // `"left"`, or `"center"`. In the latter case, the tooltip has no arrow
   // and is positioned centered in its wrapper node.
   constructor(wrapper, options) {
+
     this.wrapper = wrapper
     this.options = typeof options == "string" ? {direction: options} : options
-    this.dir = this.options.direction || "above"
+    this.dir = this.options.direction || "top"
     this.pointer = wrapper.appendChild(elt("div", {class: prefix + "-pointer-" + this.dir + " " + prefix + "-pointer"}))
     this.pointerWidth = this.pointerHeight = null
     this.dom = wrapper.appendChild(elt("div", {class: prefix}))
@@ -57,11 +79,31 @@ export default class Tooltip {
   // tooltip stays in its previous place. Unless the tooltip's
   // direction is `"center"`, `pos` should definitely be given the
   // first time it is shown.
-  open(node, pos) {
-    let left = this.lastLeft = pos ? pos.left : this.lastLeft
-    let top = this.lastTop = pos ? pos.top : this.lastTop
+  open({tooltipContent, coords, element}) {
+    let left
+    let top
+    let tooltipPossibleAnchorPoints
+    if (coords) {
+      left = this.lastLeft = coords.left
+      top = this.lastTop = coords.top
+    } else if (element) {
+      tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(element.getBoundingClientRect())
+    } else {
+      left = this.lastLeft
+      top = this.lastTop
+      tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides({
+        top: coords.top,
+        left: coords.left,
+        right: coords.left,
+        bottom: coords.top,
+        width: 0,
+        height: 0,
+      });
+    }
+    // let left = this.lastLeft = coords ? coords.left : this.lastLeft
+    // let top = this.lastTop = coords ? coords.top : this.lastTop
 
-    let size = this.getSize(node)
+    let size = this.getSize(tooltipContent)
 
     let around = this.wrapper.getBoundingClientRect()
 
@@ -73,7 +115,7 @@ export default class Tooltip {
       next = child.nextSibling
       if (child != this.pointer) this.dom.removeChild(child)
     }
-    this.dom.appendChild(node)
+    this.dom.appendChild(tooltipContent)
 
     this.dom.style.display = this.pointer.style.display = "block"
 
@@ -89,7 +131,7 @@ export default class Tooltip {
     // get the bounds for each placement
     // loop through them and find one that's on-screen. if none fit on screen,
     // use the center one?
-    const directions = ['above', 'below', 'left', 'right']
+    const directions = ['top', 'bottom', 'left', 'right']
     directions.unshift(this.dir)
     directions.splice(directions.indexOf(this.dir, 1), 1)
     const placements = []
@@ -97,7 +139,10 @@ export default class Tooltip {
       placements.push(this.getPlacementLayoutInfo({
         placement: direction,
         size: size,
-        pos: { left: left, top: top }
+        anchorPos: {
+          left: tooltipPossibleAnchorPoints[direction].left,
+          top: tooltipPossibleAnchorPoints[direction].top
+        }
       }))
     })
 
@@ -133,10 +178,7 @@ export default class Tooltip {
     this.isOpen = true
   }
 
-  getPlacementLayoutInfo({placement, size, pos}) {
-    let left = this.lastLeft = pos ? pos.left : this.lastLeft
-    let top = this.lastTop = pos ? pos.top : this.lastTop
-
+  getPlacementLayoutInfo({placement, size, anchorPos: {left, top}}) {
     const margin = 5
 
     // Use the window as the bounding rectangle if no getBoundingRect
@@ -151,12 +193,12 @@ export default class Tooltip {
     let placementInfo = {
       dom: {}, pointer: {}, bounds: {}
     }
-    if (placement == "above" || placement == "below") {
+    if (placement == "top" || placement == "bottom") {
       // Calculate the tipLeft, ensuring it is within the bounding rectangle.
       let tipLeft = Math.max(boundingRect.left, Math.min(left - size.width / 2, boundingRect.right - size.width))
       placementInfo.dom.left = tipLeft - around.left
       placementInfo.pointer.left = left - around.left - this.pointerWidth / 2
-      if (placement == "above") {
+      if (placement == "top") {
         let tipTop = top - around.top - margin - this.pointerHeight - size.height
         placementInfo.dom.top = tipTop
         placementInfo.pointer.top = tipTop + size.height
@@ -166,7 +208,7 @@ export default class Tooltip {
           top: tipTop,
           bottom: tipTop + size.height + this.pointerHeight + margin
         }
-      } else { // below
+      } else { // bottom
         let tipTop = top - around.top + margin
         placementInfo.dom.top = tipTop + this.pointerHeight
         placementInfo.pointer.top = tipTop
@@ -209,7 +251,6 @@ export default class Tooltip {
     }
 
     return placementInfo
-
   }
 
   // :: ()
@@ -301,26 +342,26 @@ insertCSS(`
   display: block;
 }
 
-.${prefix}-pointer-above {
+.${prefix}-pointer-top {
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-top: 6px solid #777;
 }
 
-.${prefix}-pointer-above:after {
+.${prefix}-pointer-top:after {
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-top: 6px solid white;
   left: -6px; top: -7px;
 }
 
-.${prefix}-pointer-below {
+.${prefix}-pointer-bottom {
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-bottom: 6px solid #777;
 }
 
-.${prefix}-pointer-below:after {
+.${prefix}-pointer-bottom:after {
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-bottom: 6px solid white;
