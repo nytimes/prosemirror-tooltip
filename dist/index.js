@@ -204,6 +204,14 @@ module.exports =
 	      directions.splice(directions.indexOf(this.dir, 1), 1);
 	      var placements = [];
 	      directions.forEach(function (direction) {
+	        if (direction === 'top') {
+	          _this2.pointerHeight = 12;
+	          _this2.pointerWidth = 6;
+	        }
+	        if (direction === 'bottom') {
+	          _this2.pointerHeight = 13;
+	          _this2.pointerWidth = 22;
+	        }
 	        placements.push(_this2.getPlacementLayoutInfo({
 	          placement: direction,
 	          size: size,
@@ -229,14 +237,6 @@ module.exports =
 	          this.pointer.classList.remove(prefix + "-pointer-right");
 	          this.pointer.classList.remove(prefix + "-pointer-bottom");
 	          this.pointer.classList.add(prefix + "-pointer-" + placement.direction);
-	          if (placement.direction === 'top') {
-	            this.pointerHeight = 12;
-	            this.pointerWidth = 6;
-	          }
-	          if (placement.direction === 'bottom') {
-	            this.pointerHeight = 22;
-	            this.pointerWidth = 13;
-	          }
 	          this.dom.style.left = placement.dom.left + "px";
 	          this.dom.style.top = placement.dom.top + "px";
 	          this.pointer.style.left = placement.pointer.left + "px";
@@ -252,14 +252,6 @@ module.exports =
 	        this.pointer.classList.remove(prefix + "-pointer-right");
 	        this.pointer.classList.remove(prefix + "-pointer-bottom");
 	        this.pointer.classList.add(prefix + "-pointer-" + _placement.direction);
-	        if (_placement.direction === 'top') {
-	          this.pointerWidth = 12;
-	          this.pointerHeight = 6;
-	        }
-	        if (_placement.direction === 'bottom') {
-	          this.pointerWidth = 22;
-	          this.pointerHeight = 13;
-	        }
 	        this.dom.style.left = _placement.dom.left + "px";
 	        this.dom.style.top = _placement.dom.top + "px";
 	        this.pointer.style.left = _placement.pointer.left + "px";

@@ -129,6 +129,14 @@ export default class Tooltip {
     directions.splice(directions.indexOf(this.dir, 1), 1)
     const placements = []
     directions.forEach((direction) => {
+      if (direction === 'top') {
+        this.pointerHeight = 12
+        this.pointerWidth = 6
+      }
+      if (direction === 'bottom') {
+        this.pointerHeight = 13
+        this.pointerWidth = 22
+      }
       placements.push(this.getPlacementLayoutInfo({
         placement: direction,
         size: size,
@@ -154,14 +162,6 @@ export default class Tooltip {
         this.pointer.classList.remove(`${prefix}-pointer-right`)
         this.pointer.classList.remove(`${prefix}-pointer-bottom`)
         this.pointer.classList.add(`${prefix}-pointer-${placement.direction}`)
-        if (placement.direction === 'top') {
-          this.pointerHeight = 12
-          this.pointerWidth = 6
-        }
-        if (placement.direction === 'bottom') {
-          this.pointerHeight = 22
-          this.pointerWidth = 13
-        }
         this.dom.style.left = placement.dom.left + "px"
         this.dom.style.top = placement.dom.top + "px"
         this.pointer.style.left = placement.pointer.left + "px"
@@ -177,14 +177,6 @@ export default class Tooltip {
       this.pointer.classList.remove(`${prefix}-pointer-right`)
       this.pointer.classList.remove(`${prefix}-pointer-bottom`)
       this.pointer.classList.add(`${prefix}-pointer-${placement.direction}`)
-      if (placement.direction === 'top') {
-        this.pointerWidth = 12
-        this.pointerHeight = 6
-      }
-      if (placement.direction === 'bottom') {
-        this.pointerWidth = 22
-        this.pointerHeight = 13
-      }
       this.dom.style.left = placement.dom.left + "px"
       this.dom.style.top = placement.dom.top + "px"
       this.pointer.style.left = placement.pointer.left + "px"
