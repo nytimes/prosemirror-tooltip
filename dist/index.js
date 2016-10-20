@@ -75,8 +75,30 @@ module.exports =
 	    left: {
 	      top: box.bottom - box.height / 2,
 	      left: box.left
-	    }
+	    },
+	    width: box.width,
+	    height: box.height
 	  };
+	};
+
+	var makeBoundingRectRelativeToDocument = function makeBoundingRectRelativeToDocument(boundingRect) {
+	  return {
+	    top: boundingRect.top + window.scrollY,
+	    bottom: boundingRect.bottom + window.scrollY,
+	    left: boundingRect.left + window.scrollX,
+	    right: boundingRect.right + window.scrollX,
+	    width: boundingRect.width,
+	    height: boundingRect.height
+	  };
+	};
+
+	var getViewportBounds = function getViewportBounds() {
+	  var viewportBounds = {};
+	  viewportBounds.left = (window.pageXOffset || document.scrollLeft || 0) - (document.clientLeft || 0);
+	  viewportBounds.top = (window.pageYOffset || document.scrollTop || 0) - (document.clientTop || 0);
+	  viewportBounds.right = viewportBounds.left + window.innerWidth;
+	  viewportBounds.bottom = viewportBounds.top + window.innerHeight;
+	  return viewportBounds;
 	};
 
 	// ;; Used to show tooltips. An instance of this class is a persistent
@@ -157,23 +179,23 @@ module.exports =
 
 	      var tooltipPossibleAnchorPoints = void 0;
 	      if (coords) {
-	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides({
+	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(makeBoundingRectRelativeToDocument({
 	          top: coords.top,
 	          left: coords.left,
 	          right: coords.left,
 	          bottom: coords.top,
 	          width: 0,
 	          height: 0
-	        });
+	        }));
 	      } else if (element) {
-	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(element.getBoundingClientRect());
+	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(makeBoundingRectRelativeToDocument(element.getBoundingClientRect()));
 	      }
 	      // let left = this.lastLeft = coords ? coords.left : this.lastLeft
 	      // let top = this.lastTop = coords ? coords.top : this.lastTop
 
 	      var size = this.getSize(tooltipContent);
 
-	      var around = this.wrapper.getBoundingClientRect();
+	      var around = makeBoundingRectRelativeToDocument(this.wrapper.getBoundingClientRect());
 
 	      // Use the window as the bounding rectangle if no getBoundingRect
 	      // function is defined
@@ -222,25 +244,23 @@ module.exports =
 	        }));
 	      });
 
+	      // let around = makeBoundingRectRelativeToDocument(this.wrapper.getBoundingClientRect())
+
 	      // Find a placement that fits within the viewport.
 	      var i = 0;
 	      for (; i < placements.length; i++) {
 	        var placement = placements[i];
-	        var viewportBounds = {};
-	        viewportBounds.left = (window.pageXOffset || document.scrollLeft || 0) - (document.clientLeft || 0);
-	        viewportBounds.top = (window.pageYOffset || document.scrollTop || 0) - (document.clientTop || 0);
-	        viewportBounds.right = viewportBounds.left + window.innerWidth;
-	        viewportBounds.bottom = viewportBounds.top + window.innerHeight;
-	        if (placement.bounds.left + around.left >= viewportBounds.left && placement.bounds.right + around.left <= viewportBounds.right && placement.bounds.top + around.top >= viewportBounds.top && placement.bounds.bottom + around.top <= viewportBounds.bottom) {
+	        var viewportBounds = getViewportBounds();
+	        if (placement.bounds.left >= viewportBounds.left && placement.bounds.right <= viewportBounds.right && placement.bounds.top >= viewportBounds.top && placement.bounds.bottom <= viewportBounds.bottom) {
 	          this.pointer.classList.remove(prefix + "-pointer-top");
 	          this.pointer.classList.remove(prefix + "-pointer-left");
 	          this.pointer.classList.remove(prefix + "-pointer-right");
 	          this.pointer.classList.remove(prefix + "-pointer-bottom");
 	          this.pointer.classList.add(prefix + "-pointer-" + placement.direction);
-	          this.dom.style.left = placement.dom.left + "px";
-	          this.dom.style.top = placement.dom.top + "px";
-	          this.pointer.style.left = placement.pointer.left + "px";
-	          this.pointer.style.top = placement.pointer.top + "px";
+	          this.dom.style.left = placement.dom.left - around.left + "px";
+	          this.dom.style.top = placement.dom.top - around.top + "px";
+	          this.pointer.style.left = placement.pointer.left - around.left + "px";
+	          this.pointer.style.top = placement.pointer.top - around.top + "px";
 	          break;
 	        }
 	      }
@@ -252,10 +272,10 @@ module.exports =
 	        this.pointer.classList.remove(prefix + "-pointer-right");
 	        this.pointer.classList.remove(prefix + "-pointer-bottom");
 	        this.pointer.classList.add(prefix + "-pointer-" + _placement.direction);
-	        this.dom.style.left = _placement.dom.left + "px";
-	        this.dom.style.top = _placement.dom.top + "px";
-	        this.pointer.style.left = _placement.pointer.left + "px";
-	        this.pointer.style.top = _placement.pointer.top + "px";
+	        this.dom.style.left = _placement.dom.left - around.left + "px";
+	        this.dom.style.top = _placement.dom.top - around.top + "px";
+	        this.pointer.style.left = _placement.pointer.left - around.left + "px";
+	        this.pointer.style.top = _placement.pointer.top - around.top + "px";
 	      }
 
 	      getComputedStyle(this.dom).opacity;
@@ -283,7 +303,6 @@ module.exports =
 	      // function is defined
 	      var boundingRect = (this.options.getBoundingRect || windowRect)();
 
-	      var around = this.wrapper.getBoundingClientRect();
 	      // get the bounds for each placement
 	      // loop through them and find one that's on-screen. if none fit on screen,
 	      // use the center one?
@@ -294,10 +313,10 @@ module.exports =
 	      if (placement == "top" || placement == "bottom") {
 	        // Calculate the tipLeft, ensuring it is within the bounding rectangle.
 	        var tipLeft = Math.max(boundingRect.left, Math.min(left - size.width / 2, boundingRect.right - size.width));
-	        placementInfo.dom.left = tipLeft - around.left;
-	        placementInfo.pointer.left = left - around.left - this.pointerWidth / 2;
+	        placementInfo.dom.left = tipLeft;
+	        placementInfo.pointer.left = left - this.pointerWidth / 2;
 	        if (placement == "top") {
-	          var tipTop = top - around.top - margin - this.pointerHeight - size.height;
+	          var tipTop = top - margin - this.pointerHeight - size.height;
 	          placementInfo.dom.top = tipTop;
 	          placementInfo.pointer.top = tipTop + size.height;
 	          placementInfo.bounds = {
@@ -308,7 +327,7 @@ module.exports =
 	          };
 	        } else {
 	          // bottom
-	          var _tipTop = top - around.top + margin;
+	          var _tipTop = top - +margin;
 	          placementInfo.dom.top = _tipTop + this.pointerHeight;
 	          placementInfo.pointer.top = _tipTop;
 	          placementInfo.bounds = {
@@ -319,37 +338,37 @@ module.exports =
 	          };
 	        }
 	      } else if (placement == "left" || placement == "right") {
-	        placementInfo.dom.top = top - around.top - size.height / 2;
-	        placementInfo.pointer.top = top - this.pointerHeight / 2 - around.top;
+	        placementInfo.dom.top = top - size.height / 2;
+	        placementInfo.pointer.top = top - this.pointerHeight / 2;
 	        if (placement == "left") {
-	          var pointerLeft = left - around.left - margin - this.pointerWidth;
+	          var pointerLeft = left - margin - this.pointerWidth;
 	          placementInfo.dom.left = pointerLeft - size.width;
 	          placementInfo.pointer.left = pointerLeft + "px";
 	          placementInfo.bounds = {
 	            left: pointerLeft - size.width,
 	            right: pointerLeft + this.pointerWidth + margin,
-	            top: top - around.top - size.height / 2,
-	            bottom: top - around.top + size.height / 2
+	            top: top - size.height / 2,
+	            bottom: top + size.height / 2
 	          };
 	        } else {
 	          // right
-	          var _pointerLeft = left - around.left + margin;
+	          var _pointerLeft = left + margin;
 	          placementInfo.dom.left = _pointerLeft + this.pointerWidth;
 	          placementInfo.pointer.left = _pointerLeft;
 	          placementInfo.bounds = {
 	            left: _pointerLeft,
 	            right: _pointerLeft + this.pointerWidth + size.width,
-	            top: top - around.top - size.height / 2,
-	            bottom: top - around.top + size.height / 2
+	            top: top - size.height / 2,
+	            bottom: top + size.height / 2
 	          };
 	        }
-	      } else if (placement == "center") {
-	        var _top = Math.max(around.top, boundingRect.top),
-	            bottom = Math.min(around.bottom, boundingRect.bottom);
-	        var fromTop = (bottom - _top - size.height) / 2;
-	        this.dom.style.left = (around.width - size.width) / 2 + "px";
-	        this.dom.style.top = _top - around.top + fromTop + "px";
 	      }
+	      // else if (placement == "center") {
+	      //   let top = Math.max(around.top, boundingRect.top), bottom = Math.min(around.bottom, boundingRect.bottom)
+	      //   let fromTop = (bottom - top - size.height) / 2
+	      //   this.dom.style.left = (around.width - size.width) / 2 + "px"
+	      //   this.dom.style.top = (top - around.top + fromTop) + "px"
+	      // }
 
 	      return placementInfo;
 	    }
