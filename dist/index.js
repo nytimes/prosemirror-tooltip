@@ -58,6 +58,13 @@ module.exports =
 	/* eslint-disable */
 	var prefix = "ProseMirror-tooltip";
 
+	/**
+	 * Given a rectangular box, get four coordinates that
+	 * are in the middle of each side of the box.
+	 *
+	 * @param  {object} box
+	 * @returns {object}
+	 */
 	var getCenterPointsOfBoxSides = function getCenterPointsOfBoxSides(box) {
 	  return {
 	    top: {
@@ -81,15 +88,31 @@ module.exports =
 	  };
 	};
 
-	var makeBoundingRectRelativeToDocument = function makeBoundingRectRelativeToDocument(boundingRect) {
+	/**
+	 * Given a rectangular box whos coordinates are relative to the viewport,
+	 * make it relative to the document.
+	 *
+	 * @param  {object} boundingRect
+	 * @return {object}
+	 */
+	var getDocumentRelativeRectFromViewportRelativeRect = function getDocumentRelativeRectFromViewportRelativeRect(box) {
 	  return {
-	    top: boundingRect.top + window.scrollY,
-	    bottom: boundingRect.bottom + window.scrollY,
-	    left: boundingRect.left + window.scrollX,
-	    right: boundingRect.right + window.scrollX,
-	    width: boundingRect.width,
-	    height: boundingRect.height
+	    top: box.top + window.scrollY,
+	    bottom: box.bottom + window.scrollY,
+	    left: box.left + window.scrollX,
+	    right: box.right + window.scrollX,
+	    width: box.width,
+	    height: box.height
 	  };
+	};
+
+	/**
+	 * Get the bounding rectangle for an element relative to the document.
+	 * @param  {DOMElement} element
+	 * @return {object}
+	 */
+	var getBoundingClientRectRelativeToDocument = function getBoundingClientRectRelativeToDocument(element) {
+	  return getDocumentRelativeRectFromViewportRelativeRect(element.getBoundingClientRect());
 	};
 
 	var getViewportBounds = function getViewportBounds() {
@@ -179,7 +202,7 @@ module.exports =
 
 	      var tooltipPossibleAnchorPoints = void 0;
 	      if (coords) {
-	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(makeBoundingRectRelativeToDocument({
+	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(getDocumentRelativeRectFromViewportRelativeRect({
 	          top: coords.top,
 	          left: coords.left,
 	          right: coords.left,
@@ -188,14 +211,14 @@ module.exports =
 	          height: 0
 	        }));
 	      } else if (element) {
-	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(makeBoundingRectRelativeToDocument(element.getBoundingClientRect()));
+	        tooltipPossibleAnchorPoints = getCenterPointsOfBoxSides(getBoundingClientRectRelativeToDocument(element));
 	      }
 	      // let left = this.lastLeft = coords ? coords.left : this.lastLeft
 	      // let top = this.lastTop = coords ? coords.top : this.lastTop
 
 	      var size = this.getSize(tooltipContent);
 
-	      var around = makeBoundingRectRelativeToDocument(this.wrapper.getBoundingClientRect());
+	      var around = getBoundingClientRectRelativeToDocument(this.wrapper);
 
 	      // Use the window as the bounding rectangle if no getBoundingRect
 	      // function is defined
@@ -227,15 +250,15 @@ module.exports =
 	      var placements = [];
 	      directions.forEach(function (direction) {
 	        if (direction === 'top') {
-	          _this2.pointerHeight = 12;
-	          _this2.pointerWidth = 6;
+	          _this2.pointerHeight = 13;
+	          _this2.pointerWidth = 22;
 	        }
 	        if (direction === 'bottom') {
 	          _this2.pointerHeight = 13;
 	          _this2.pointerWidth = 22;
 	        }
 	        placements.push(_this2.getPlacementLayoutInfo({
-	          placement: direction,
+	          direction: direction,
 	          size: size,
 	          anchorPos: {
 	            left: tooltipPossibleAnchorPoints[direction].left,
@@ -288,10 +311,24 @@ module.exports =
 	      }
 	      this.isOpen = true;
 	    }
+
+	    /**
+	     * If the tooltip was to be placed in a specific direction, get the placement
+	     * information:
+	     *  - the bounding box of the tooltip
+	     *  - the DOM positioning of the tooltip and tooltipcontent elements
+	     *
+	     * @param  {string} options.direction      The direction of the tooltip (top, bottom, right, left)
+	     * @param  {object} options.size           The size of the tooltip content
+	     * @param  {object} options.anchorPos.left X coordinate for the anchor of the tooltip.
+	     * @param  {object} options.anchorPos.top  Y coordinate for the anchor of the tooltip.
+	     * @returns {object} Placement
+	     */
+
 	  }, {
 	    key: "getPlacementLayoutInfo",
 	    value: function getPlacementLayoutInfo(_ref2) {
-	      var placement = _ref2.placement;
+	      var direction = _ref2.direction;
 	      var size = _ref2.size;
 	      var _ref2$anchorPos = _ref2.anchorPos;
 	      var left = _ref2$anchorPos.left;
@@ -303,19 +340,19 @@ module.exports =
 	      // function is defined
 	      var boundingRect = (this.options.getBoundingRect || windowRect)();
 
-	      // get the bounds for each placement
+	      // get the bounds for each direction
 	      // loop through them and find one that's on-screen. if none fit on screen,
 	      // use the center one?
 	      //
 	      var placementInfo = {
-	        direction: placement, dom: {}, pointer: {}, bounds: {}
+	        direction: direction, dom: {}, pointer: {}, bounds: {}
 	      };
-	      if (placement == "top" || placement == "bottom") {
+	      if (direction == "top" || direction == "bottom") {
 	        // Calculate the tipLeft, ensuring it is within the bounding rectangle.
 	        var tipLeft = Math.max(boundingRect.left, Math.min(left - size.width / 2, boundingRect.right - size.width));
 	        placementInfo.dom.left = tipLeft;
 	        placementInfo.pointer.left = left - this.pointerWidth / 2;
-	        if (placement == "top") {
+	        if (direction == "top") {
 	          var tipTop = top - margin - this.pointerHeight - size.height;
 	          placementInfo.dom.top = tipTop;
 	          placementInfo.pointer.top = tipTop + size.height;
@@ -337,10 +374,10 @@ module.exports =
 	            bottom: _tipTop + size.height + this.pointerHeight + margin
 	          };
 	        }
-	      } else if (placement == "left" || placement == "right") {
+	      } else if (direction == "left" || direction == "right") {
 	        placementInfo.dom.top = top - size.height / 2;
 	        placementInfo.pointer.top = top - this.pointerHeight / 2;
-	        if (placement == "left") {
+	        if (direction == "left") {
 	          var pointerLeft = left - margin - this.pointerWidth;
 	          placementInfo.dom.left = pointerLeft - size.width;
 	          placementInfo.pointer.left = pointerLeft + "px";
@@ -363,7 +400,7 @@ module.exports =
 	          };
 	        }
 	      }
-	      // else if (placement == "center") {
+	      // else if (direction == "center") {
 	      //   let top = Math.max(around.top, boundingRect.top), bottom = Math.min(around.bottom, boundingRect.bottom)
 	      //   let fromTop = (bottom - top - size.height) / 2
 	      //   this.dom.style.left = (around.width - size.width) / 2 + "px"
