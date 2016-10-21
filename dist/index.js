@@ -240,23 +240,13 @@ module.exports =
 	      this.dom.style.width = size.width + "px";
 	      this.dom.style.height = size.height + "px";
 
-	      // const margin = 5
-	      // get the bounds for each placement
-	      // loop through them and find one that's on-screen. if none fit on screen,
-	      // use the center one?
 	      var directions = ['top', 'bottom', 'left', 'right'];
 	      directions.unshift(this.dir);
 	      directions.splice(directions.indexOf(this.dir, 1), 1);
 	      var placements = [];
 	      directions.forEach(function (direction) {
-	        if (direction === 'top') {
-	          _this2.pointerHeight = 13;
-	          _this2.pointerWidth = 22;
-	        }
-	        if (direction === 'bottom') {
-	          _this2.pointerHeight = 13;
-	          _this2.pointerWidth = 22;
-	        }
+	        _this2.pointerHeight = 13;
+	        _this2.pointerWidth = 22;
 	        placements.push(_this2.getPlacementLayoutInfo({
 	          direction: direction,
 	          size: size,
@@ -267,9 +257,7 @@ module.exports =
 	        }));
 	      });
 
-	      // let around = makeBoundingRectRelativeToDocument(this.wrapper.getBoundingClientRect())
-
-	      // Find a placement that fits within the viewport.
+	      // Apply the first tooltip placement that fits within the viewport.
 	      var i = 0;
 	      for (; i < placements.length; i++) {
 	        var placement = placements[i];
@@ -287,7 +275,7 @@ module.exports =
 	          break;
 	        }
 	      }
-	      // If no placement fits in viewport, try the first one.
+	      // If no placement fits in viewport, just use the first one.
 	      if (i === placements.length) {
 	        var _placement = placements[0];
 	        this.pointer.classList.remove(prefix + "-pointer-top");

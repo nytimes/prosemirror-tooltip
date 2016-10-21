@@ -165,26 +165,16 @@ export default class Tooltip {
     this.dom.style.width = size.width + "px"
     this.dom.style.height = size.height + "px"
 
-    // const margin = 5
-    // get the bounds for each placement
-    // loop through them and find one that's on-screen. if none fit on screen,
-    // use the center one?
     const directions = ['top', 'bottom', 'left', 'right']
     directions.unshift(this.dir)
     directions.splice(directions.indexOf(this.dir, 1), 1)
     const placements = []
     directions.forEach((direction) => {
-      if (direction === 'top') {
-        this.pointerHeight = 13
-        this.pointerWidth = 22
-      }
-      if (direction === 'bottom') {
-        this.pointerHeight = 13
-        this.pointerWidth = 22
-      }
+      this.pointerHeight = 13
+      this.pointerWidth = 22
       placements.push(this.getPlacementLayoutInfo({
         direction,
-        size: size,
+        size,
         anchorPos: {
           left: tooltipPossibleAnchorPoints[direction].left,
           top: tooltipPossibleAnchorPoints[direction].top
@@ -192,9 +182,7 @@ export default class Tooltip {
       }))
     })
 
-    // let around = makeBoundingRectRelativeToDocument(this.wrapper.getBoundingClientRect())
-
-    // Find a placement that fits within the viewport.
+    // Apply the first tooltip placement that fits within the viewport.
     let i = 0
     for (; i < placements.length; i++) {
       let placement = placements[i]
@@ -212,7 +200,7 @@ export default class Tooltip {
         break
       }
     }
-    // If no placement fits in viewport, try the first one.
+    // If no placement fits in viewport, just use the first one.
     if (i === placements.length) {
       let placement = placements[0]
       this.pointer.classList.remove(`${prefix}-pointer-top`)
