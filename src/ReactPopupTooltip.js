@@ -58,7 +58,6 @@ class ReactPopupTooltip extends Component {
         return !hasDiff;
     }
     shouldComponentUpdate(nextProps, nextState){
-        console.log('PROP CHANGE?',!this.isEqual(nextProps, this.props));
         return !this.isEqual(nextState, this.state) || !this.isEqual(nextProps, this.props);
     }
     position(){
@@ -80,17 +79,17 @@ class ReactPopupTooltip extends Component {
                 top:this.props.containerElement.offsetTop},
             left,
             top,
-            justify = ReactPopupTooltipSTART,
-            align = ReactPopupTooltipCENTER;
+            justify = ReactPopupTooltip.START,
+            align = ReactPopupTooltip.CENTER;
         containerRect = this.container.getBoundingClientRect();
         let targetCenterXPos = this.props.targetBounds.left + (this.props.targetBounds.width/2);
         left = (targetCenterXPos) - (containerRect.width/2);
         if (left<containmentBounds.left)
         {
-            align = ReactPopupTooltipSTART;
+            align = ReactPopupTooltip.START;
             left = this.props.targetBounds.left + (this.props.targetBounds.width / 2);
         }else if ((left+(containerRect.width*1.5))>(containmentBounds.right)){
-            align = ReactPopupTooltipEND;
+            align = ReactPopupTooltip.END;
             left = this.props.targetBounds.left + (this.props.targetBounds.width/2) - containerRect.width;
         }
         top = this.props.targetBounds.top + (this.props.targetBounds.height)-bounding.top;
@@ -101,10 +100,10 @@ class ReactPopupTooltip extends Component {
             let oldTop = top;
             top = (this.props.targetBounds.top - containerRect.height)-bounding.top;
             top = (top<0) ? oldTop : top;
-            justify = (oldTop!=top)?ReactPopupTooltipEND:ReactPopupTooltipSTART;
+            justify = (oldTop!=top)?ReactPopupTooltip.END:ReactPopupTooltip.START;
 
         }else{
-            justify = ReactPopupTooltipSTART
+            justify = ReactPopupTooltip.START
         }
 
         this.setState({
@@ -115,7 +114,7 @@ class ReactPopupTooltip extends Component {
         });
     }
     get classNames() {
-        return `Popup-Container${(this.state.hidden) ? ' hidden':''}`;
+        return `Popup-Tooltip-Container${(this.state.hidden) ? ' hidden':''}`;
     }
     get styles ()
     {
@@ -145,12 +144,12 @@ class ReactPopupTooltip extends Component {
     render({children: children} = {}){
         // let children = (obj && obj.children ) ? obj.children : this.props.children;
         return (
-            `<div style={this.styles} data-align={this.state.align}  data-justify={this.state.justify} className={this.classNames} ref={(el) => this.container = el} tabIndex="-1">
+            <div style={this.styles} data-align={this.state.align}  data-justify={this.state.justify} className={this.classNames} ref={(el) => this.container = el} tabIndex="-1">
             <div className="Popup-Tooltip-Arrow" ref={(el) => this.arrow = el}></div>
-        <div className="Popup-Content">
+        <div className="Popup-Tooltip-Content">
             {children||this.props.children}
     </div>
-        </div>`
+        </div>
     );
     }
     componentDidUpdate(){

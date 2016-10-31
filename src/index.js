@@ -1,2 +1,3 @@
-export { ReactPopupTooltip } from './ReactPopupTooltip';
-export { Tooltip } from './Tooltip';
+
+export { default as ReactPopupTooltip } from './ReactPopupTooltip';
+export { default as default } from './Tooltip';

@@ -56,18 +56,20 @@ module.exports =
 	Object.defineProperty(exports, 'ReactPopupTooltip', {
 	  enumerable: true,
 	  get: function get() {
-	    return _ReactPopupTooltip.ReactPopupTooltip;
+	    return _interopRequireDefault(_ReactPopupTooltip).default;
 	  }
 	});
 
 	var _Tooltip = __webpack_require__(39);
 
-	Object.defineProperty(exports, 'Tooltip', {
+	Object.defineProperty(exports, 'default', {
 	  enumerable: true,
 	  get: function get() {
-	    return _Tooltip.Tooltip;
+	    return _interopRequireDefault(_Tooltip).default;
 	  }
 	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
 /* 1 */
@@ -215,7 +217,6 @@ module.exports =
 	    }, {
 	        key: 'shouldComponentUpdate',
 	        value: function shouldComponentUpdate(nextProps, nextState) {
-	            console.log('PROP CHANGE?', !this.isEqual(nextProps, this.props));
 	            return !this.isEqual(nextState, this.state) || !this.isEqual(nextProps, this.props);
 	        }
 	    }, {
@@ -238,16 +239,16 @@ module.exports =
 	                top: this.props.containerElement.offsetTop },
 	                left = void 0,
 	                top = void 0,
-	                justify = ReactPopupTooltipSTART,
-	                align = ReactPopupTooltipCENTER;
+	                justify = ReactPopupTooltip.START,
+	                align = ReactPopupTooltip.CENTER;
 	            containerRect = this.container.getBoundingClientRect();
 	            var targetCenterXPos = this.props.targetBounds.left + this.props.targetBounds.width / 2;
 	            left = targetCenterXPos - containerRect.width / 2;
 	            if (left < containmentBounds.left) {
-	                align = ReactPopupTooltipSTART;
+	                align = ReactPopupTooltip.START;
 	                left = this.props.targetBounds.left + this.props.targetBounds.width / 2;
 	            } else if (left + containerRect.width * 1.5 > containmentBounds.right) {
-	                align = ReactPopupTooltipEND;
+	                align = ReactPopupTooltip.END;
 	                left = this.props.targetBounds.left + this.props.targetBounds.width / 2 - containerRect.width;
 	            }
 	            top = this.props.targetBounds.top + this.props.targetBounds.height - bounding.top;
@@ -258,9 +259,9 @@ module.exports =
 	                var oldTop = top;
 	                top = this.props.targetBounds.top - containerRect.height - bounding.top;
 	                top = top < 0 ? oldTop : top;
-	                justify = oldTop != top ? ReactPopupTooltipEND : ReactPopupTooltipSTART;
+	                justify = oldTop != top ? ReactPopupTooltip.END : ReactPopupTooltip.START;
 	            } else {
-	                justify = ReactPopupTooltipSTART;
+	                justify = ReactPopupTooltip.START;
 	            }
 
 	            this.setState({
@@ -296,11 +297,26 @@ module.exports =
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var _this2 = this;
+
 	            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
 	                children = _ref.children;
 
 	            // let children = (obj && obj.children ) ? obj.children : this.props.children;
-	            return '<div style={this.styles} data-align={this.state.align}  data-justify={this.state.justify} className={this.classNames} ref={(el) => this.container = el} tabIndex="-1">\n            <div className="Popup-Tooltip-Arrow" ref={(el) => this.arrow = el}></div>\n        <div className="Popup-Content">\n            {children||this.props.children}\n    </div>\n        </div>';
+	            return _react2.default.createElement(
+	                'div',
+	                { style: this.styles, 'data-align': this.state.align, 'data-justify': this.state.justify, className: this.classNames, ref: function ref(el) {
+	                        return _this2.container = el;
+	                    }, tabIndex: '-1' },
+	                _react2.default.createElement('div', { className: 'Popup-Tooltip-Arrow', ref: function ref(el) {
+	                        return _this2.arrow = el;
+	                    } }),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'Popup-Tooltip-Content' },
+	                    children || this.props.children
+	                )
+	            );
 	        }
 	    }, {
 	        key: 'componentDidUpdate',
@@ -311,7 +327,7 @@ module.exports =
 	    }, {
 	        key: 'classNames',
 	        get: function get() {
-	            return 'Popup-Container' + (this.state.hidden ? ' hidden' : '');
+	            return 'Popup-Tooltip-Container' + (this.state.hidden ? ' hidden' : '');
 	        }
 	    }, {
 	        key: 'styles',
