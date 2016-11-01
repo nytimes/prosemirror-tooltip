@@ -182,14 +182,6 @@ ReactPopupTooltip.propTypes = {
         left:React.PropTypes.number,
     }),
     containerElement:React.PropTypes.object,
-    containingBounds:React.PropTypes.shape({
-        width:React.PropTypes.number,
-        height:React.PropTypes.number,
-        top:React.PropTypes.number,
-        right:React.PropTypes.number,
-        bottom:React.PropTypes.number,
-        left:React.PropTypes.number,
-    }),
     hidden: React.PropTypes.bool
 }
 ReactPopupTooltip.defaultProps = {
