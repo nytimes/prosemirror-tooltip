@@ -147,6 +147,9 @@ module.exports =
 	            left: 0,
 	            hidden: _this.truthy(props.hidden)
 	        };
+	        _this.onBlurHandler = function (evt) {
+	            return _this.onBlur(evt);
+	        };
 	        return _this;
 	    }
 
@@ -247,7 +250,7 @@ module.exports =
 	            if (left < containmentBounds.left) {
 	                align = ReactPopupTooltip.START;
 	                left = this.props.targetBounds.left + this.props.targetBounds.width / 2;
-	            } else if (left + containerRect.width * 1.5 > containmentBounds.right) {
+	            } else if (left + containerRect.width > containmentBounds.right) {
 	                align = ReactPopupTooltip.END;
 	                left = this.props.targetBounds.left + this.props.targetBounds.width / 2 - containerRect.width;
 	            }
@@ -270,6 +273,22 @@ module.exports =
 	                justify: justify,
 	                align: align
 	            });
+	        }
+	    }, {
+	        key: 'focus',
+	        value: function focus() {
+	            this.container.focus();
+	            this.container.addEventListener('blur', this.onBlurHandler);
+	        }
+	    }, {
+	        key: 'onBlur',
+	        value: function onBlur(evt) {
+	            if (this.container.contains(evt.relatedTarget)) {
+	                this.focus();
+	                return;
+	            }
+	            this.container.removeEventListener('blur', this.onBlurHandler);
+	            this.close();
 	        }
 	    }, {
 	        key: 'open',
@@ -323,6 +342,7 @@ module.exports =
 	        value: function componentDidUpdate() {
 	            // slightly dangerous to call position on the element which contains a set state, therefore shouldComponentUpdate makes certain we don't need to update anything as the default behavior is to update every time state is changed even if it hasn't
 	            this.position();
+	            this.focus();
 	        }
 	    }, {
 	        key: 'classNames',
@@ -4584,7 +4604,7 @@ module.exports =
 
 
 	// module
-	exports.push([module.id, ".Popup-Tooltip-Container {\n  display: inline-flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute; }\n  .Popup-Tooltip-Container .Popup-Tooltip-Content {\n    min-width: 100px;\n    background-color: #999;\n    padding: 5px 10px;\n    border-radius: 5px;\n    -webkit-box-shadow: 0px 0px 2px 0px black;\n    -moz-box-shadow: 0px 0px 2px 0px black;\n    box-shadow: 0px 0px 2px 0px black; }\n  .Popup-Tooltip-Container .Popup-Tooltip-Arrow {\n    width: 0;\n    height: 0;\n    border-style: solid;\n    z-index: 2;\n    border-width: 0 7.5px 10px;\n    border-color: transparent transparent #999 transparent; }\n  .Popup-Tooltip-Container[data-align='start'] .Popup-Tooltip-Arrow {\n    align-self: flex-start;\n    border-width: 10px 0 0 10px;\n    border-color: transparent transparent transparent #999; }\n  .Popup-Tooltip-Container[data-align='start'] .Popup-Tooltip-Content {\n    border-top-left-radius: 0; }\n  .Popup-Tooltip-Container[data-align='end'] .Popup-Tooltip-Arrow {\n    align-self: flex-end;\n    border-width: 0 0 10px 10px;\n    border-color: transparent transparent #999 transparent; }\n  .Popup-Tooltip-Container[data-align='end'] .Popup-Tooltip-Content {\n    border-top-right-radius: 0; }\n  .Popup-Tooltip-Container[data-justify='end'] .Popup-Tooltip-Content {\n    border-radius: 5px; }\n  .Popup-Tooltip-Container[data-justify='end'] .Popup-Tooltip-Arrow {\n    border-width: 10px 7.5px 0 7.5px;\n    border-color: #999 transparent transparent transparent;\n    order: 1; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='start'] .Popup-Tooltip-Content {\n    border-bottom-left-radius: 0; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='start'] .Popup-Tooltip-Arrow {\n    border-width: 10px 10px 0 0;\n    border-color: #999 transparent transparent transparent; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='end'] .Popup-Tooltip-Content {\n    border-bottom-right-radius: 0; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='end'] .Popup-Tooltip-Arrow {\n    border-width: 0 10px 10px 0;\n    border-color: transparent #999 transparent transparent; }\n  .Popup-Tooltip-Container.hidden {\n    display: none; }\n", ""]);
+	exports.push([module.id, ".Popup-Tooltip-Container {\n  display: inline-flex;\n  flex-direction: column;\n  align-items: center;\n  position: absolute; }\n  .Popup-Tooltip-Container:focus {\n    outline: none; }\n  .Popup-Tooltip-Container .Popup-Tooltip-Content {\n    min-width: 100px;\n    background-color: #999;\n    padding: 5px 10px;\n    border-radius: 5px;\n    -webkit-box-shadow: 0px 0px 2px 0px black;\n    -moz-box-shadow: 0px 0px 2px 0px black;\n    box-shadow: 0px 0px 2px 0px black; }\n  .Popup-Tooltip-Container .Popup-Tooltip-Arrow {\n    width: 0;\n    height: 0;\n    border-style: solid;\n    z-index: 2;\n    border-width: 0 7.5px 10px;\n    border-color: transparent transparent #999 transparent; }\n  .Popup-Tooltip-Container[data-align='start'] .Popup-Tooltip-Arrow {\n    align-self: flex-start;\n    border-width: 10px 0 0 10px;\n    border-color: transparent transparent transparent #999; }\n  .Popup-Tooltip-Container[data-align='start'] .Popup-Tooltip-Content {\n    border-top-left-radius: 0; }\n  .Popup-Tooltip-Container[data-align='end'] .Popup-Tooltip-Arrow {\n    align-self: flex-end;\n    border-width: 0 0 10px 10px;\n    border-color: transparent transparent #999 transparent; }\n  .Popup-Tooltip-Container[data-align='end'] .Popup-Tooltip-Content {\n    border-top-right-radius: 0; }\n  .Popup-Tooltip-Container[data-justify='end'] .Popup-Tooltip-Content {\n    border-radius: 5px; }\n  .Popup-Tooltip-Container[data-justify='end'] .Popup-Tooltip-Arrow {\n    border-width: 10px 7.5px 0 7.5px;\n    border-color: #999 transparent transparent transparent;\n    order: 1; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='start'] .Popup-Tooltip-Content {\n    border-bottom-left-radius: 0; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='start'] .Popup-Tooltip-Arrow {\n    border-width: 10px 10px 0 0;\n    border-color: #999 transparent transparent transparent; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='end'] .Popup-Tooltip-Content {\n    border-bottom-right-radius: 0; }\n  .Popup-Tooltip-Container[data-justify='end'][data-align='end'] .Popup-Tooltip-Arrow {\n    border-width: 0 10px 10px 0;\n    border-color: transparent #999 transparent transparent; }\n  .Popup-Tooltip-Container.hidden {\n    display: none; }\n", ""]);
 
 	// exports
 

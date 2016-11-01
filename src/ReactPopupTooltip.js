@@ -25,6 +25,7 @@ class ReactPopupTooltip extends Component {
             left:0,
             hidden:this.truthy(props.hidden),
         }
+        this.onBlurHandler = (evt) => this.onBlur(evt);
     }
     componentWillMount(){
     }
@@ -88,7 +89,7 @@ class ReactPopupTooltip extends Component {
         {
             align = ReactPopupTooltip.START;
             left = this.props.targetBounds.left + (this.props.targetBounds.width / 2);
-        }else if ((left+(containerRect.width*1.5))>(containmentBounds.right)){
+        }else if ((left+containerRect.width)>(containmentBounds.right)){
             align = ReactPopupTooltip.END;
             left = this.props.targetBounds.left + (this.props.targetBounds.width/2) - containerRect.width;
         }
@@ -113,6 +114,18 @@ class ReactPopupTooltip extends Component {
             align:align,
         });
     }
+    focus(){
+        this.container.focus();
+        this.container.addEventListener('blur', this.onBlurHandler)
+    }
+    onBlur(evt) {
+        if(this.container.contains(evt.relatedTarget)){
+            this.focus();
+            return;
+        }
+        this.container.removeEventListener('blur', this.onBlurHandler)
+        this.close();
+    }
     get classNames() {
         return `Popup-Tooltip-Container${(this.state.hidden) ? ' hidden':''}`;
     }
@@ -125,6 +138,7 @@ class ReactPopupTooltip extends Component {
     }
     open(){
         this.setState({hidden:false});
+
     }
     close(){
         this.setState({hidden:true});
@@ -155,6 +169,7 @@ class ReactPopupTooltip extends Component {
     componentDidUpdate(){
         // slightly dangerous to call position on the element which contains a set state, therefore shouldComponentUpdate makes certain we don't need to update anything as the default behavior is to update every time state is changed even if it hasn't
         this.position();
+        this.focus();
     }
 }
 ReactPopupTooltip.propTypes = {

@@ -6,6 +6,9 @@ $borderRadius:5px;
   flex-direction: column;
   align-items: center;
   position:absolute;
+  &:focus{
+    outline:none;
+  }
 
   .Popup-Tooltip-Content {
     min-width:100px;
