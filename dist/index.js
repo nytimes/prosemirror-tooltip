@@ -5054,7 +5054,7 @@ module.exports =
 	                class: prefix,
 	                style: "display: block; position: absolute"
 	            }, node));
-	            var size = { width: wrap.offsetWidth + 1, height: wrap.offsetHeight };
+	            var size = { width: wrap.offsetWidth, height: wrap.offsetHeight };
 	            wrap.parentNode.removeChild(wrap);
 	            return size;
 	        }
