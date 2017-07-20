@@ -1,0 +1,3 @@
+{
+  "extends": "@nyt-cms/babel-config-nyt-cms/.babelrc"
+}
