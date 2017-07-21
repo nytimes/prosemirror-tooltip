@@ -8,7 +8,7 @@ const prefix = "ProseMirror-tooltip"
  * @param  {object} box
  * @returns {object}
  */
-const getCenterPointsOfBoxSides = (box) => {
+export const getCenterPointsOfBoxSides = (box) => {
     return {
         top: {
             top: box.top,
@@ -38,7 +38,7 @@ const getCenterPointsOfBoxSides = (box) => {
  * @param  {object} boundingRect
  * @return {object}
  */
-const getDocumentRelativeRectFromViewportRelativeRect = (box) => {
+export const getDocumentRelativeRectFromViewportRelativeRect = (box) => {
     return {
         top: box.top + window.scrollY,
         bottom: box.bottom + window.scrollY,
@@ -54,11 +54,11 @@ const getDocumentRelativeRectFromViewportRelativeRect = (box) => {
  * @param  {DOMElement} element
  * @return {object}
  */
-const getBoundingClientRectRelativeToDocument = (element) => {
+export const getBoundingClientRectRelativeToDocument = (element) => {
     return getDocumentRelativeRectFromViewportRelativeRect(element.getBoundingClientRect())
 }
 
-const getViewportBounds = () => {
+export const getViewportBounds = () => {
     const viewportBounds = {}
     viewportBounds.left = (window.pageXOffset || document.scrollLeft || 0) - (document.clientLeft || 0)
     viewportBounds.top = (window.pageYOffset || document.scrollTop || 0)  - (document.clientTop || 0)
@@ -72,7 +72,7 @@ const getViewportBounds = () => {
 // shown and hidden. It is positioned relative to a position (passed
 // when showing the tooltip), and points at that position with a
 // little arrow-like triangle attached to the node.
-export default class Tooltip {
+export class Tooltip {
     // :: (DOMNode, union<string, Object>)
     // Create a new tooltip that lives in the wrapper node, which should
     // be its offset anchor, i.e. it should have a `relative` or
@@ -326,20 +326,20 @@ export default class Tooltip {
     }
 }
 
-function windowRect() {
+export function windowRect() {
     return {
         left: 0, right: window.innerWidth,
         top: 0, bottom: window.innerHeight
     }
 }
 
-function insertCSS(css) {
+export function insertCSS(css) {
     const cssNode = document.createElement("style")
     cssNode.textContent = "/* Tooltip CSS */\n" + css
     document.head.insertBefore(cssNode, document.head.firstChild)
 }
 
-function elt(tag, attrs, ...args) {
+export function elt(tag, attrs, ...args) {
     let result = document.createElement(tag)
     if (attrs) for (let name in attrs) {
         if (name == "style")
@@ -351,7 +351,7 @@ function elt(tag, attrs, ...args) {
     return result
 }
 
-function add(value, target) {
+export function add(value, target) {
     if (typeof value == "string")
         value = document.createTextNode(value)
 
